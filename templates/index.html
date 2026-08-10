@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Auto PO Generator</title>
+
+</head>
+
+<body>
+
+<h2>Auto PO Generator</h2>
+
+<h3>History Manager</h3>
+
+<p>History Monthly Usage</p>
+
+<input
+    type="file"
+    id="history_monthly_usage"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<button id="usage_history_update">
+update usage history
+</button>
+
+<p>Restaurant Inventory</p>
+
+<input
+    type="file"
+    id="restaurant_inventory"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<button id="inventory_history_update">
+update inventory history
+</button>
+
+<p>History PO</p>
+
+<input
+    type="file"
+    id="History_PO"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<p>Catalog</p>
+
+<input
+    type="file"
+    id="catalog"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<button id="catalog_update">
+update catalog
+</button>
+
+
+
+
+
+<h3>Calculation & Generation</h3>
+<p>Usage</p>
+
+<input
+    type="file"
+    id="usage"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<p>Inventory in current month</p>
+
+<input
+    type="file"
+    id="inventory_currentM"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+
+<p>Next Replenishment Date</p>
+
+<input
+    type="date"
+    id="replenishment_date">
+
+<br><br>
+<!--
+<p>HQ Inventory (Optional)</p>
+
+<input
+    type="file"
+    id="inv_HQ"
+    accept=".xlsx,.xls">
+
+<br><br>
+-->
+<button id="generateBtn">
+Generate PO
+</button>
+
+<br><br>
+
+<button id="downloadExcelBtn" style="display:none;">
+Download Excel
+</button>
+
+<br><br>
+
+<button id="downloadJsonBtn" style="display:none;">
+Download JSON
+</button>
+
+<br><br>
+
+<p id="status">
+Loading...
+</p>
+
+
+<script src="{{ url_for('static', filename='input.js') }}"></script>
+
+
+<!--
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+
+<script src="input.js"></script>
+-->
+</body>
+
+</html>
