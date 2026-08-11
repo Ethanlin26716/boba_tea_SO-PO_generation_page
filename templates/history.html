@@ -13,6 +13,24 @@
 
 <h2>Auto PO Generator</h2>
 
+
+<div class="navbar">
+
+    <div class="menu">
+        <button class="menu-button">☰</button>
+
+        <div class="menu-content">
+            <a href="/">Generate PO</a>
+            <a href="/history">History Manager</a>
+        </div>
+    </div>
+
+    <h2>Boba Tea Inventory System</h2>
+
+</div>
+
+
+
 <h3>History Manager</h3>
 
 <p>History Monthly Usage</p>
@@ -28,18 +46,31 @@
 update usage history
 </button>
 
+<h4>Uploaded Months</h4>
+
+<ul id="usage_history_months">
+</ul>
+
+
+
 <p>Restaurant Inventory</p>
 
 <input
     type="file"
     id="restaurant_inventory"
     accept=".xlsx,.xls">
-
 <br><br>
 
 <button id="inventory_history_update">
 update inventory history
 </button>
+
+
+<h4>Recent Inventory Snapshots</h4>
+
+<ul id="inventory_history_dates">
+</ul>
+
 
 <p>History PO</p>
 
@@ -63,62 +94,6 @@ update inventory history
 update catalog
 </button>
 
-
-
-
-
-<h3>Calculation & Generation</h3>
-<p>Usage</p>
-
-<input
-    type="file"
-    id="usage"
-    accept=".xlsx,.xls">
-
-<br><br>
-
-<p>Inventory in current month</p>
-
-<input
-    type="file"
-    id="inventory_currentM"
-    accept=".xlsx,.xls">
-
-<br><br>
-
-
-<p>Next Replenishment Date</p>
-
-<input
-    type="date"
-    id="replenishment_date">
-
-<br><br>
-<!--
-<p>HQ Inventory (Optional)</p>
-
-<input
-    type="file"
-    id="inv_HQ"
-    accept=".xlsx,.xls">
-
-<br><br>
--->
-<button id="generateBtn">
-Generate PO
-</button>
-
-<br><br>
-
-<button id="downloadExcelBtn" style="display:none;">
-Download Excel
-</button>
-
-<br><br>
-
-<button id="downloadJsonBtn" style="display:none;">
-Download JSON
-</button>
 
 <br><br>
 

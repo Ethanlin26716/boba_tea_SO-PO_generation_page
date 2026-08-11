@@ -17,11 +17,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 
-
 @app.route("/")
 def index():
+    return render_template("generate.html")
 
-    return render_template("index.html")
+
+@app.route("/history")
+def history():
+    return render_template("history.html")
 
 
 @app.route("/update_usage_history", methods=["POST"])
@@ -54,6 +57,24 @@ def update_usage_history_route():
         "message": "Usage history updated"
     })
 
+USAGE_HISTORY = "history_data/usage_history.xlsx"
+@app.route("/usage_history_months")
+def usage_history_months():
+
+    usage = pd.read_excel(
+        USAGE_HISTORY,
+        sheet_name="All"
+    )
+
+    periods = (
+        usage["出料时间段"]
+        .drop_duplicates()
+        .sort_values(ascending=False)
+        .tolist()
+    )
+
+    return jsonify(periods)
+
 
 @app.route("/update_inventory_history", methods=["POST"])
 def update_inventory_history_route():
@@ -84,6 +105,46 @@ def update_inventory_history_route():
         "status": "success",
         "message": "Inventory history updated"
     })
+
+INVENTORY_HISTORY = "history_data/inventory_history.xlsx"
+@app.route("/inventory_history_dates")
+def inventory_history_dates():
+
+    inventory = pd.read_excel(
+        INVENTORY_HISTORY
+    )
+
+    inventory["inv_snapshot_date"] = pd.to_datetime(
+        inventory["inv_snapshot_date"]
+    )
+
+    recent_dates = (
+        inventory["inv_snapshot_date"]
+        .drop_duplicates()
+        .nlargest(5)
+    )
+
+    recent = inventory[
+        inventory["inv_snapshot_date"].isin(recent_dates)
+    ].copy()
+
+    recent = (
+        recent
+        .groupby("inv_snapshot_date")["门店名称"]
+        .apply(lambda x: ", ".join(x.dropna().astype(str).unique()))
+        .reset_index()
+    )
+
+    recent["inv_snapshot_date"] = (
+        recent["inv_snapshot_date"]
+        .dt.strftime("%Y-%m-%d")
+    )
+
+    return jsonify(
+        recent.to_dict(orient="records")
+    )
+
+
 
 
 @app.route("/update_purchase_history", methods=["POST"])

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Auto PO Generator</title>
+
+</head>
+
+<body>
+
+<h2>Auto PO Generator</h2>
+
+
+<div class="navbar">
+
+    <div class="menu">
+        <button class="menu-button">☰</button>
+
+        <div class="menu-content">
+            <a href="/">Generate PO</a>
+            <a href="/history">History Manager</a>
+        </div>
+    </div>
+
+    <h2>Boba Tea Inventory System</h2>
+
+</div>
+
+
+
+<h3>Calculation & Generation</h3>
+<p>Usage</p>
+
+<input
+    type="file"
+    id="usage"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<p>Inventory in current month</p>
+
+<input
+    type="file"
+    id="inventory_currentM"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+
+<p>Next Replenishment Date</p>
+
+<input
+    type="date"
+    id="replenishment_date">
+
+<br><br>
+<!--
+<p>HQ Inventory (Optional)</p>
+
+<input
+    type="file"
+    id="inv_HQ"
+    accept=".xlsx,.xls">
+
+<br><br>
+-->
+<button id="generateBtn">
+Generate PO
+</button>
+
+<br><br>
+
+<button id="downloadExcelBtn" style="display:none;">
+Download Excel
+</button>
+
+<br><br>
+
+<button id="downloadJsonBtn" style="display:none;">
+Download JSON
+</button>
+
+<br><br>
+
+<p id="status">
+Loading...
+</p>
+
+
+<script src="{{ url_for('static', filename='input.js') }}"></script>
+
+
+<!--
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+
+<script src="input.js"></script>
+-->
+</body>
+
+</html>

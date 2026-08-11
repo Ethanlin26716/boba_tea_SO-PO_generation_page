@@ -46,7 +46,34 @@ document
 
 });
 
+async function loadUsagePeriods() {
 
+    const response = await fetch(
+        "/usage_history_months"
+    );
+
+    const months = await response.json();
+
+    const list =
+        document.getElementById(
+            "usage_history_months"
+        );
+
+    list.innerHTML = "";
+
+    months.forEach(month => {
+
+        const li =
+            document.createElement("li");
+
+        li.textContent = month;
+
+        list.appendChild(li);
+
+    });
+
+}
+loadUsagePeriods();
 
 
 document
@@ -95,6 +122,47 @@ document
 });
 
 
+
+async function loadInventoryDates() {
+
+    const response = await fetch(
+        "/inventory_history_dates"
+    );
+
+    const data = await response.json();
+
+    const list =
+        document.getElementById(
+            "inventory_history_dates"
+        );
+
+    list.innerHTML = "";
+
+    data.forEach(row => {
+
+        const li =
+            document.createElement("li");
+
+        li.textContent =
+            `${row.inv_snapshot_date} — ${row.门店名称}`;
+
+        list.appendChild(li);
+
+    });
+}
+
+loadInventoryDates();
+
+
+
+
+
+
+
+
+
+
+
 document
 .getElementById("catalog_update")
 .addEventListener("click", async () => {
@@ -138,6 +206,7 @@ document
     data.message;
 
 });
+
 
 
 
@@ -294,3 +363,14 @@ document
 
 
 });
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        loadUsagePeriods();
+        loadInventoryDates();
+    }
+);
+
+

@@ -194,11 +194,11 @@ def sync_inventory_usage():
         candidate_inventory["inv_snapshot_date"]
         == latest_snapshot
     ].copy()
-
+    '''
     print(candidate_inventory.empty)
     print(latest_snapshot)
     print(usage["Usage_Month"].unique())
-
+    '''
     if candidate_inventory.empty:
 
         print("No inventory snapshot available for current usage history.")
