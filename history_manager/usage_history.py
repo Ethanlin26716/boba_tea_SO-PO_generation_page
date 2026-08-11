@@ -96,7 +96,10 @@ def standardlize_history():
     # -------------------------
     # Tea Conversion
     # -------------------------
-    merged["adjusted_usage"] = merged["出料总量"]
+    merged["adjusted_usage"] = pd.to_numeric(
+        merged["出料总量"],
+        errors="coerce"
+    ).astype(float)
 
     tea_mask = merged["rawMaterial_EN"].str.contains(
         "Tea",

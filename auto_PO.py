@@ -191,7 +191,10 @@ def generate_po(replenishment_date):
     # -------------------------
     # Tea Conversion
     # -------------------------
-    merged_inv["adjusted_usage"] = merged_inv["出料总量"]
+    merged_inv["adjusted_usage"] = pd.to_numeric(
+        merged_inv["出料总量"],
+        errors="coerce"
+    ).astype(float)
 
     tea_mask = merged_inv["rawMaterial_EN"].str.contains(
         "Tea",
