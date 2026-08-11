@@ -14,20 +14,11 @@
 <h2>Auto PO Generator</h2>
 
 
-<div class="navbar">
 
-    <div class="menu">
-        <button class="menu-button">☰</button>
 
-        <div class="menu-content">
-            <a href="/">Generate PO</a>
-            <a href="/history">History Manager</a>
-        </div>
-    </div>
 
-    <h2>Boba Tea Inventory System</h2>
 
-</div>
+
 
 
 
@@ -94,6 +85,65 @@ update inventory history
 update catalog
 </button>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h3>Calculation & Generation</h3>
+<p>Usage</p>
+
+<input
+    type="file"
+    id="usage"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<p>Inventory in current month</p>
+
+<input
+    type="file"
+    id="inventory_currentM"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+
+<p>Next Replenishment Date</p>
+
+<input
+    type="date"
+    id="replenishment_date">
+
+<br><br>
+
+<button id="generateBtn">
+Generate PO
+</button>
+
+<br><br>
+
+<button id="downloadExcelBtn" style="display:none;">
+Download Excel
+</button>
+
+<br><br>
+
+<button id="downloadJsonBtn" style="display:none;">
+Download JSON
+</button>
 
 <br><br>
 

@@ -19,12 +19,7 @@ os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 @app.route("/")
 def index():
-    return render_template("generate.html")
-
-
-@app.route("/history")
-def history():
-    return render_template("history.html")
+    return render_template("index.html")
 
 
 @app.route("/update_usage_history", methods=["POST"])

@@ -129,7 +129,7 @@ def generate_po(replenishment_date):
                         "Closing_Inventory"
                     ]]
                 .rename(
-                    columns={"Closing_Inventory": "current_inventory"}
+                    columns={"Closing_Inventory": "month_start_inv"}
                 )
             )
 
@@ -175,15 +175,15 @@ def generate_po(replenishment_date):
     # -------------------------
     merged_inv["Inventory_Note"] = ""
 
-    merged_inv["current_inventory"] = pd.to_numeric(
-        merged_inv["current_inventory"],
+    merged_inv["month_start_inv"] = pd.to_numeric(
+        merged_inv["month_start_inv"],
         errors="coerce"
     )
 
-    merged_inv["current_inventory"] = merged_inv["current_inventory"] * merged_inv["Package_Size_Base"]
+    #merged_inv["current_inventory"] = merged_inv["current_inventory"] * merged_inv["Package_Size_Base"]
 
     merged_inv.loc[
-        merged_inv["current_inventory"].isna(),
+        merged_inv["month_start_inv"].isna(),
         "Inventory_Note"
     ] = "Invalid or missing inventory"
 
@@ -253,6 +253,7 @@ def generate_po(replenishment_date):
         merged_inv["inv_snapshot_date"].dt.day
     )
 
+    '''
     # month start inventory
     merged_inv["month_start_inv"] = (
         merged_inv["current_inventory"] 
@@ -260,7 +261,7 @@ def generate_po(replenishment_date):
         * merged_inv["snapshot_days"]
         / merged_inv["出料时间段天数"]
     )
-
+    '''
 
     merged_inv["average_daily_usage"] = (
         merged_inv["adjusted_usage"] 
@@ -269,7 +270,7 @@ def generate_po(replenishment_date):
 
     # when we need to replenish, how many inv left
     merged_inv["inv_before_replenishment"] = (
-        merged_inv["current_inventory"] 
+        merged_inv["month_start_inv"] 
         - merged_inv["average_daily_usage"] 
         * merged_inv["days_to_replenishment"]
     )
@@ -312,7 +313,7 @@ def generate_po(replenishment_date):
             "Please update usage history first."
         )
 
-    '''
+    
     print(type(last_month))
 
     print(
@@ -331,7 +332,7 @@ def generate_po(replenishment_date):
     print("last month rows:", len(last_month_usage))
     print(last_month_usage.columns.tolist())
     print(last_month_usage.head())
-    '''
+    
 
     #merge上月用量
     merged_lastM = merged_inv.merge(
