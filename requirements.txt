@@ -3,3 +3,4 @@ numpy==2.5.1
 pandas==3.0.3
 psycopg2==2.9.12
 gunicorn==26.0.0
+openpyxl
