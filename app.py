@@ -88,7 +88,7 @@ def usage_history_months():
 
 
 
-    @app.route("/debug_files")
+@app.route("/debug_files")
 def debug_files():
 
     return jsonify({
