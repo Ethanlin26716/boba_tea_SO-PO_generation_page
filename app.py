@@ -78,57 +78,6 @@ def usage_history_months():
 
 
 
-
-
-
-
-
-
-
-
-
-
-@app.route("/debug_files")
-def debug_files():
-
-    return jsonify({
-        "cwd": os.getcwd(),
-
-        "usage_history_exists": os.path.exists(
-            USAGE_HISTORY
-        ),
-
-        "inventory_history_exists": os.path.exists(
-            INVENTORY_HISTORY
-        ),
-
-        "usage_history_path": USAGE_HISTORY,
-
-        "inventory_history_path": INVENTORY_HISTORY,
-
-        "history_folder": (
-            os.listdir("history_data")
-            if os.path.exists("history_data")
-            else "NOT FOUND"
-        )
-    })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @app.route("/update_inventory_history", methods=["POST"])
 def update_inventory_history_route():
 
