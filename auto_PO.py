@@ -79,8 +79,12 @@ def generate_po(replenishment_date):
 
     inventory_path = "uploads/inventory_currentM.xlsx"
     if os.path.exists(inventory_path):
-        # if user uploaded the inventory file
         restaurant_inv = pd.read_excel(inventory_path)
+        restaurant_inv = restaurant_inv.rename(
+            columns={
+                "current_inventory": "month_start_inv"
+            }
+        )
 
     else:
 
@@ -271,6 +275,27 @@ def generate_po(replenishment_date):
         / merged_inv["出料时间段天数"]
         )
 
+
+
+
+    if os.path.exists(inventory_path):
+
+        # 上传的是package
+        merged_inv["month_start_inv"] *= merged_inv["Package_Size_Base"]
+
+        # 回推月初
+        merged_inv["days_elapsed"] = (
+            merged_inv["inv_snapshot_date"]
+            - merged_inv["Month_Start"]
+        ).dt.days
+
+        merged_inv["month_start_inv"] += (
+            merged_inv["average_daily_usage"]
+            * merged_inv["days_elapsed"]
+        )
+
+
+    
     # when we need to replenish, how many inv left
     merged_inv["inv_before_replenishment"] = (
         merged_inv["month_start_inv"] 
