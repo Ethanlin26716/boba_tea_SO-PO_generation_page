@@ -295,7 +295,7 @@ def generate_po(replenishment_date):
         )
 
 
-    
+
     # when we need to replenish, how many inv left
     merged_inv["inv_before_replenishment"] = (
         merged_inv["month_start_inv"] 
@@ -471,6 +471,7 @@ def generate_po(replenishment_date):
                 "target_inventory",
                 "Purchased_Amount",
                 "month_start_inv",
+                "inv_before_replenishment",
                 "Inventory_After_PO",
                 "replenishment_date",
                 "Recommended_Quantity",
