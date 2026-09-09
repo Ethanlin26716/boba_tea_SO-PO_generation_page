@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, send_file, jsonify
 from auto_PO import generate_po
 import os
-from history_manager.usage_history import update_usage_history, standardlize_history
-from history_manager.inventory_history import update_inventory_history, sync_inventory_usage
+from history_mgmt.usage_history import update_usage_history, standardlize_history
+from history_mgmt.inventory_history import update_inventory_history, sync_inventory_usage
 import pandas as pd
-#from history_manager.purchase_history import update_purchase_history
+from utils.data_loader import load_catalog
+#from history_mgmt.purchase_history import update_purchase_history
+import numpy as np
 
 app = Flask(__name__)
 
@@ -22,6 +24,13 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/history_manager")
+def history_manager():
+
+    return render_template(
+        "history_manager.html"
+    )
+    
 @app.route("/update_usage_history", methods=["POST"])
 def update_usage_history_route():
 
@@ -174,62 +183,19 @@ def update_purchase_history_route():
     })
 
 
-@app.route("/upload_catalog", methods=["POST"])
-def upload_catalog():
 
-    catalog = request.files.get("catalog")
 
-    catalog_path = os.path.join(
-        "excel_templates",
-        "Mascon_Ingredient_Catalog.xlsx"
-    )
+@app.route("/upload_hq_inventory", methods=["POST"])
+def upload_hq_inventory():
 
-    if not catalog or catalog.filename == "":
-        return jsonify({
-            "status": "error",
-            "message": "No catalog selected."
-        }), 400
+    file = request.files["file"]
 
-    try:
-        df = pd.read_excel(catalog)
+    save_path = "uploads/hq_inventory.xlsx"
 
-    except Exception as e:
-        print(e)
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 400
-
-    required_columns = [
-        "Category",
-        "Product",
-        "Chinese",
-        "Order Unit",
-        "Shelf Life",
-        "Price"
-    ]
-
-    missing = [
-        col
-        for col in required_columns
-        if col not in df.columns
-    ]
-
-    if missing:
-        return jsonify({
-            "status": "error",
-            "message":
-                f"Missing columns: {', '.join(missing)}"
-        }), 400
-
-    # 文件已经被read了一遍，要回到开头
-    catalog.seek(0)
-
-    catalog.save(catalog_path)
+    file.save(save_path)
 
     return jsonify({
-        "status": "success",
-        "message": "Catalog updated."
+        "message": "HQ inventory uploaded."
     })
 
 
@@ -323,6 +289,105 @@ def download(filename):
         as_attachment=True
 
     )
+
+
+
+
+
+
+
+
+@app.route("/catalog")
+def catalog():
+
+    return render_template(
+        "catalog.html"
+    )
+
+@app.route("/catalog/data")
+def catalog_data():
+
+    catalog = load_catalog()
+
+    catalog = catalog.replace({np.nan: None})
+
+    return jsonify(
+        catalog.to_dict(orient="records")
+    )
+
+@app.route(
+    "/catalog/save",
+    methods=["POST"]
+)
+def save_catalog_route():
+
+    data=request.json
+
+    df=pd.DataFrame(data)
+
+    save_catalog(df)
+
+    return jsonify(
+        {
+            "status":"success"
+        }
+    )
+
+
+CATALOG_FILE="history_data/catalog_master.xlsx"
+
+def save_catalog(df):
+
+    df.to_excel(
+
+        CATALOG_FILE,
+
+        index=False
+
+    )
+
+
+@app.route(
+    "/catalog/reset",
+    methods=["POST"]
+)
+def reset_catalog_route():
+
+    reset_catalog()
+
+    return jsonify(
+        {
+            "status": "success"
+        }
+    )
+
+CATALOG_FILE = "history_data/catalog_master.xlsx"
+
+DEFAULT_CATALOG = (
+    "excel_templates/Mascon_Ingredient_Catalog.xlsx"
+)
+
+
+def reset_catalog():
+
+    default = pd.read_excel(
+        DEFAULT_CATALOG
+    )
+
+
+    default.to_excel(
+        CATALOG_FILE,
+        index=False
+    )
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":

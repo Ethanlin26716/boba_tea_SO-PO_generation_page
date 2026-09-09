@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Auto PO Generator --- History Manager</title>
+
+</head>
+
+<body>
+
+<h2>History Manager</h2>
+
+
+<nav>
+<a href="/">
+Generate PO
+</a>
+</nav>
+
+<nav>
+<a href="/history_manager">
+History Manager
+</a>
+</nav>
+
+<nav>
+<a href="/catalog">
+Catalog
+</a>
+</nav>
+
+
+<p>History Monthly Usage</p>
+
+<input
+    type="file"
+    id="history_monthly_usage"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<button id="usage_history_update">
+update usage history
+</button>
+
+<h4>Uploaded Months</h4>
+
+<ul id="usage_history_months">
+</ul>
+
+
+
+<p>Restaurant Inventory</p>
+
+<input
+    type="file"
+    id="restaurant_inventory"
+    accept=".xlsx,.xls">
+<br><br>
+
+<button id="inventory_history_update">
+update inventory history
+</button>
+
+
+<h4>Recent Inventory Snapshots</h4>
+
+<ul id="inventory_history_dates">
+</ul>
+
+
+<p>History PO</p>
+
+<input
+    type="file"
+    id="History_PO"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<p>Catalog</p>
+
+<input
+    type="file"
+    id="catalog"
+    accept=".xlsx,.xls">
+
+<br><br>
+
+<button id="catalog_update">
+update catalog
+</button>
+
+
+
+<script src="/static/history_manager.js"></script>
+
+
+

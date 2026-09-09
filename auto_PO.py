@@ -5,41 +5,13 @@ import os
 import json
 from datetime import datetime
 import calendar
+from utils.standardizer import standardize_data
+from utils.data_loader import load_usage, load_catalog, load_inventory, load_hq_inventory
+from utils.data_saver import save_po_excel, save_json, build_po_json, PO_OUTPUT_COLUMNS
+from utils.format import validate_usage_period
 
 
-def extract_english(text):
-
-    text = str(text)
-
-    english = re.sub(r'[\u4e00-\u9fff]', '', text)
-    english = re.sub(r'\(.*?\)', '', english)
-    english = re.sub(r'\s+', ' ', english).strip()
-
-    return english if english else None
-
-
-def convert_to_base(row):
-
-    size = row["Package_Size"]
-    unit = row["Package_Unit"]
-
-    if unit == "kg":
-        return size * 1000
-
-    elif unit == "g":
-        return size
-
-    elif unit == "L":
-        return size * 1000
-
-    elif unit == "ml":
-        return size
-
-    elif unit == "pcs":
-        return size
-
-    return None
-
+USAGE_HISTORY = "history_data/usage_history.xlsx"
 
 def generate_po(replenishment_date):
 
@@ -48,38 +20,62 @@ def generate_po(replenishment_date):
         "%Y-%m-%d"
     )
 
-    materialConsumption = pd.read_excel("uploads/usage.xlsx")
-    materialConsumption = materialConsumption[materialConsumption["门店名称"] != "Mascon"].copy()
+    materialConsumption = load_usage("uploads/usage.xlsx")
 
-    catalog_path = (
-        "uploads/catalog.xlsx"
-        if os.path.exists("uploads/catalog.xlsx")
-        else "excel_templates/Mascon_Ingredient_Catalog.xlsx"
-    )
-
-    ingredientCatalog = pd.read_excel(catalog_path)
+    validate_usage_period(materialConsumption, period_type="current")
 
 
-    ingredientCatalog["Product_Match"] = (
-        ingredientCatalog["Product"]
-        .str.replace(r"\s*\(Selected\)", "", regex=True)
-    )
-
-    materialConsumption["rawMaterial_EN"] = (
-        materialConsumption["原料名称"]
-        .apply(extract_english)
-    )
+    ingredientCatalog = load_catalog()
 
     merged = materialConsumption.merge(
         ingredientCatalog,
         left_on="rawMaterial_EN",
-        right_on="Product_Match",
+        right_on="Product",
         how="left"
     )
 
+    # -----------------------------
+    # Current / Last month
+    # -----------------------------
+    usage_history = load_usage(USAGE_HISTORY)
+
+    usage_history["Usage_Month"] = (
+        pd.to_datetime(
+            usage_history["Usage_Month"]
+        ).dt.to_period("M")
+    )
+
+    merged["Usage_Start"] = pd.to_datetime(
+        merged["出料时间段"].str.split("~").str[0]
+    )
+
+    current_month = (
+        merged["Usage_Start"]
+        .iloc[0]
+        .to_period("M")
+    )
+
+    last_month = current_month - 1
+
+    last_month_usage = usage_history[
+        usage_history["Usage_Month"] == last_month
+    ].copy()
+
+    if last_month_usage.empty:
+        raise ValueError(
+            f"No usage history found for previous month ({last_month}). "
+            "Please update usage history first."
+        )
+
+    # -----------------------------
+    # Inventory source
+    # -----------------------------
     inventory_path = "uploads/inventory_currentM.xlsx"
+
     if os.path.exists(inventory_path):
-        restaurant_inv = pd.read_excel(inventory_path)
+
+        restaurant_inv = load_inventory(inventory_path)
+
         restaurant_inv = restaurant_inv.rename(
             columns={
                 "current_inventory": "month_start_inv"
@@ -88,64 +84,26 @@ def generate_po(replenishment_date):
 
     else:
 
-        usage_history = pd.read_excel(
-            "history_data/usage_history.xlsx",
-            sheet_name="All"
+        restaurant_inv = (
+            last_month_usage[
+                [
+                    "门店名称",
+                    "rawMaterial_EN",
+                    "Closing_Inventory"
+                ]
+            ]
+            .rename(
+                columns={
+                    "Closing_Inventory": "month_start_inv"
+                }
+            )
         )
 
-        usage_history["Usage_Month"] = (
-            pd.to_datetime(
-                usage_history["Usage_Month"]
-            )
-            .dt.to_period("M")
+        restaurant_inv["inv_snapshot_date"] = (
+            current_month.start_time
         )
-
-        merged["Usage_Start"] = pd.to_datetime(
-            merged["出料时间段"].str.split("~").str[0]
-        )
-        # 当前月份
-        current_month = (
-            merged["Usage_Start"]
-            .iloc[0]
-            .to_period("M")
-        )
-
-        # 上个月
-        last_month = current_month - 1
-
-        last_month_usage = usage_history[
-            usage_history["Usage_Month"] == last_month
-        ].copy()
-
-        #check if last month history exist
-        if last_month_usage.empty:
-            raise ValueError(
-                f"No usage history found for previous month ({last_month}). "
-                "Please update usage history first."
-            )
-
-        #create an inv file with history data and snapshot date as Month.1st
-        else:
-            restaurant_inv = (
-                last_month_usage[[
-                        "门店名称",
-                        "rawMaterial_EN",
-                        "Closing_Inventory"
-                    ]]
-                .rename(
-                    columns={"Closing_Inventory": "month_start_inv"}
-                )
-            )
-
-            restaurant_inv["inv_snapshot_date"] = (
-                current_month.start_time
-            )
 
     print(restaurant_inv.head())
-
-
-
-
     
 
     merged_inv = merged.merge(
@@ -154,26 +112,6 @@ def generate_po(replenishment_date):
         how="left"
     )
 
-    # -------------------------
-    # Package Size
-    # -------------------------
-    merged_inv["Package_Size"] = (
-        merged_inv["Order Unit"]
-        .str.extract(r'(\d+\.?\d*)')
-        .astype(float)
-    )
-
-    merged_inv["Package_Unit"] = (
-        merged_inv["Order Unit"]
-        .str.extract(r'([a-zA-Z]+)(?=/)')
-    )
-
-    merged_inv["Package_Size_Base"] = merged_inv.apply(
-        convert_to_base,
-        axis=1
-    )
-
-    
     # -------------------------
     # inv standardlization
     # -------------------------
@@ -184,43 +122,17 @@ def generate_po(replenishment_date):
         errors="coerce"
     )
 
-    #merged_inv["current_inventory"] = merged_inv["current_inventory"] * merged_inv["Package_Size_Base"]
 
     merged_inv.loc[
         merged_inv["month_start_inv"].isna(),
         "Inventory_Note"
     ] = "Invalid or missing inventory"
 
+    # ---------------------------
+    # standardlization
+    # ---------------------------    
+    merged_inv = standardize_data(merged_inv)
 
-    # -------------------------
-    # Tea Conversion
-    # -------------------------
-    merged_inv["adjusted_usage"] = pd.to_numeric(
-        merged_inv["出料总量"],
-        errors="coerce"
-    ).astype(float)
-
-    tea_mask = merged_inv["rawMaterial_EN"].str.contains(
-        "Tea",
-        case=False,
-        na=False
-    )
-
-    merged_inv.loc[tea_mask, "adjusted_usage"] = (
-        merged_inv.loc[tea_mask, "出料总量"] * 60 / 2000
-    )
-
-    # -------------------------
-    # Price
-    # -------------------------
-    merged_inv["Price"] = (
-        merged_inv["Price"].str.replace("$", "", regex=False)
-    )
-
-    merged_inv["Price"] = pd.to_numeric(
-        merged_inv["Price"],
-        errors="coerce"
-    )
 
     # ---------------------------
     # key dates
@@ -260,15 +172,6 @@ def generate_po(replenishment_date):
         merged_inv["inv_snapshot_date"].dt.day
     )
 
-    '''
-    # month start inventory
-    merged_inv["month_start_inv"] = (
-        merged_inv["current_inventory"] 
-        + merged_inv["adjusted_usage"] 
-        * merged_inv["snapshot_days"]
-        / merged_inv["出料时间段天数"]
-    )
-    '''
 
     merged_inv["average_daily_usage"] = (
         merged_inv["adjusted_usage"] 
@@ -302,65 +205,7 @@ def generate_po(replenishment_date):
         - merged_inv["average_daily_usage"] 
         * merged_inv["days_to_replenishment"]
     )
-    '''
-    merged_inv = merged_inv[
-        merged_inv["current_inventory"].notna()
-    ]
-    '''
 
-    usage_history = pd.read_excel(
-        "history_data/usage_history.xlsx",
-        sheet_name="All"
-    )
-
-    usage_history["Usage_Month"] = (
-        pd.to_datetime(
-            usage_history["Usage_Month"]
-        )
-        .dt.to_period("M")
-    )
-
-    # 当前月份
-    current_month = (
-        merged_inv["Usage_Start"]
-        .iloc[0]
-        .to_period("M")
-    )
-
-    # 上个月
-    last_month = current_month - 1
-
-    last_month_usage = usage_history[
-        usage_history["Usage_Month"] == last_month
-    ].copy()
-
-    #check if last month history exist
-    if last_month_usage.empty:
-        raise ValueError(
-            f"No usage history found for previous month ({last_month}). "
-            "Please update usage history first."
-        )
-
-    
-    print(type(last_month))
-
-    print(
-        type(
-            usage_history["Usage_Month"].iloc[0]
-        )
-    )
-
-    print("current month:", current_month)
-    print("last month:", last_month)
-
-    print(
-        usage_history["Usage_Month"].unique()
-    )
-
-    print("last month rows:", len(last_month_usage))
-    print(last_month_usage.columns.tolist())
-    print(last_month_usage.head())
-    
 
     #merge上月用量
     merged_lastM = merged_inv.merge(
@@ -424,7 +269,7 @@ def generate_po(replenishment_date):
 
     merged_lastM["Recommended_Price"] = (
         merged_lastM["Recommended_Quantity"]
-        * merged_lastM["Price"]
+        * merged_lastM["Price ($)"]
     )
 
     merged_lastM["Purchased_Amount"] = (
@@ -440,223 +285,30 @@ def generate_po(replenishment_date):
     merged_lastM = merged_lastM[merged_lastM["Recommended_Price"].notna()]
 
     merged_lastM["replenishment_date"] = replenishment_date.strftime("%Y-%m-%d")
-    '''
-    print(merged["门店名称"].unique())
-    print(merged_inv["门店名称"].unique())
-    print(merged_lastM["门店名称"].unique())
-    '''
-    #set for total
-    all_store_df = []
+    
+    # -------------------------
+    # Save_file
+    # -------------------------
 
-    with pd.ExcelWriter(
+    store_output = merged_lastM[
+        PO_OUTPUT_COLUMNS
+    ].copy()
+
+    hq_inv = load_hq_inventory()
+    save_po_excel(
+        store_output,
         "downloads/PO_by_store.xlsx",
-        engine="openpyxl"
-    ) as writer:
-
-        for store, store_df in merged_lastM.groupby("门店名称"):
-
-            
-            store_df = store_df.copy()
-
-            output_columns = [
-                "设备编号",
-                "门店名称",
-                "出料时间段",
-                "原料名称",
-                "原料代码",
-                "Shelf Life",
-                "Price",
-                "Package_Size_Base",
-                "adjusted_usage",
-                "target_inventory",
-                "Purchased_Amount",
-                "month_start_inv",
-                "inv_before_replenishment",
-                "Inventory_After_PO",
-                "replenishment_date",
-                "Recommended_Quantity",
-                "Recommended_Price"
-            ]
-            store_output = store_df[output_columns]
-            all_store_df.append(store_output)
-
-            # -------------------------
-            # Write one sheet
-            # -------------------------
-            sheet_name = str(store)[:31]      # Excel sheet名字最长31个字符
-
-            store_output.to_excel(
-                writer,
-                sheet_name=sheet_name,
-                index=False
-            )
-
-        all_store_df = pd.concat(all_store_df, ignore_index=True)
-        summary = (
-            all_store_df
-            .groupby("原料名称", as_index=False)
-            .agg({
-                "Recommended_Quantity": "sum",
-                "Recommended_Price": "sum"
-            })
-        )
-        summary.to_excel(
-            writer,
-            sheet_name="Total",
-            index=False
-        )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        '''
-        # ============================
-        # Generate JSON Output
-        # ============================
-
-        json_output = {
-
-            "input_contract_version": "1.0.0",
-
-            "output_contract_version": "1.0.0",
-
-            "calculation_engine_code":
-                "INFINITEA_PO_ENGINE",
-
-            "calculation_engine_version":
-                "1.0.0",
-
-            "generated_at":
-                datetime.now().isoformat(),
-
-            
-            "replenishment_date":
-                replenishment_date.strftime("%Y-%m-%d"),
-
-            "run_status":
-                "SUCCESS",
-
-            "results": {
-
-                "reorder_results": []
-
-            },
-
-            "errors": []
-
-        }
-
-
-        # convert dataframe to JSON records
-        for _, row in all_store_df.iterrows():
-
-            record = {
-
-                "restaurant_code":
-                    row["门店名称"],
-
-                "machine_code":
-                    row["设备编号"],
-
-                "period":
-                    row["出料时间段"],
-
-                "ingredient_code":
-                    row["原料代码"],
-
-                "ingredient_name":
-                    row["原料名称"],
-
-
-                "calculation_input": {
-
-                    "adjusted_usage":
-                        float(row["adjusted_usage"]),
-
-                    "inventory_snapshot":
-                        float(row["Current_Inventory_Cleaned"]),
-
-                    },
-
-
-                "calculation_result": {
-
-                    "target_inventory":
-                        float(row["target_inventory"]),
-
-                    "purchased_amount":
-                        float(row["Purchased_Amount"]),
-
-                    "Inventory_After_PO":
-                        float(row["Inventory_After_PO"]),
-
-                    "recommended_quantity":
-                        int(row["Recommended_Quantity"]),
-
-                    "recommended_price":
-                        float(row["Recommended_Price"])
-
-                },
-
-
-                "package_info": {
-
-                    "package_size_base":
-                        float(row["Package_Size_Base"]),
-
-                    "shelf_life":
-                        row["Shelf Life"],
-
-                    "price":
-                        float(row["Price"])
-
-                },
-
-            }
-
-
-            json_output["results"]["reorder_results"].append(record)
-
-
-
-        with open(
-            "downloads/PO_result.json",
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            json.dump(
-                json_output,
-                f,
-                indent=4,
-                ensure_ascii=False
-            )
-        
-
-
-
-        '''
+        hq_inv
+    )
+
+    json_output = build_po_json(
+        store_output,
+        replenishment_date
+    )
+
+    save_json(
+        json_output,
+        "downloads/PO_result.json"
+    )
 
     return "Success"

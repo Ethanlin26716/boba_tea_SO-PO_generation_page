@@ -1,220 +1,31 @@
-document
-.getElementById("usage_history_update")
-.addEventListener("click", async () => {
 
-    const formData = new FormData();
+async function uploadHQInventory() {
 
-    const usageHistory =
-        document
-        .getElementById("history_monthly_usage")
-        .files[0];
+    const file =
+        document.getElementById("hqInventoryFile").files[0];
 
-
-    if (!usageHistory) {
-
-        document
-        .getElementById("status")
-        .innerHTML =
-        "Please select usage file.";
-
+    if (!file) {
+        alert("Please choose a file.");
         return;
     }
 
-
-    formData.append(
-        "history_monthly_usage",
-        usageHistory
-    );
-
+    const formData = new FormData();
+    formData.append("file", file);
 
     const response = await fetch(
-        "/update_usage_history",
+        "/upload_hq_inventory",
         {
             method: "POST",
             body: formData
         }
     );
 
+    const result = await response.json();
 
-    const data = await response.json();
-
-
-    document
-    .getElementById("status")
-    .innerHTML =
-    data.message;
-
-});
-
-async function loadUsagePeriods() {
-
-    const response = await fetch(
-        "/usage_history_months"
-    );
-
-    const months = await response.json();
-
-    const list =
-        document.getElementById(
-            "usage_history_months"
-        );
-
-    list.innerHTML = "";
-
-    months.forEach(month => {
-
-        const li =
-            document.createElement("li");
-
-        li.textContent = month;
-
-        list.appendChild(li);
-
-    });
-
+    document.getElementById(
+        "hqInventoryStatus"
+    ).innerText = result.message;
 }
-loadUsagePeriods();
-
-
-document
-.getElementById("inventory_history_update")
-.addEventListener("click", async () => {
-
-    const formData = new FormData();
-
-
-    const inventory =
-        document.getElementById("restaurant_inventory").files[0];
-
-
-    if (!inventory) {
-
-        document
-        .getElementById("status")
-        .innerHTML =
-        "Please select inventory file.";
-
-        return;
-    }
-
-    formData.append(
-        "restaurant_inventory",
-        inventory
-    );
-
-    const response = await fetch(
-        "/update_inventory_history",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-
-    const data = await response.json();
-
-
-    document
-    .getElementById("status")
-    .innerHTML =
-    data.message;
-
-});
-
-
-
-async function loadInventoryDates() {
-
-    const response = await fetch(
-        "/inventory_history_dates"
-    );
-
-    const data = await response.json();
-
-    const list =
-        document.getElementById(
-            "inventory_history_dates"
-        );
-
-    list.innerHTML = "";
-
-    data.forEach(row => {
-
-        const li =
-            document.createElement("li");
-
-        li.textContent =
-            `${row.inv_snapshot_date} — ${row.门店名称}`;
-
-        list.appendChild(li);
-
-    });
-}
-
-loadInventoryDates();
-
-
-
-
-
-
-
-
-
-
-
-document
-.getElementById("catalog_update")
-.addEventListener("click", async () => {
-
-    const formData = new FormData();
-
-    const catalog =
-        document
-        .getElementById("catalog")
-        .files[0];
-
-    if (!catalog) {
-
-        document
-        .getElementById("status")
-        .innerHTML =
-        "Please select catalog file.";
-
-        return;
-
-    }
-
-    formData.append(
-        "catalog",
-        catalog
-    );
-
-    const response = await fetch(
-        "/upload_catalog",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-    const data = await response.json();
-
-    document
-    .getElementById("status")
-    .innerHTML =
-    data.message;
-
-});
-
-
-
-
-
-
-
-
-
 
 
 

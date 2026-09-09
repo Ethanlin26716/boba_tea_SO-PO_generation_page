@@ -18,90 +18,25 @@
 
 
 
+<nav>
+<a href="/">
+Generate PO
+</a>
+</nav>
+
+<nav>
+<a href="/history_manager">
+History Manager
+</a>
+</nav>
+
+<nav>
+<a href="/catalog">
+Catalog
+</a>
+</nav>
 
 
-
-
-<h3>History Manager</h3>
-
-<p>History Monthly Usage</p>
-
-<input
-    type="file"
-    id="history_monthly_usage"
-    accept=".xlsx,.xls">
-
-<br><br>
-
-<button id="usage_history_update">
-update usage history
-</button>
-
-<h4>Uploaded Months</h4>
-
-<ul id="usage_history_months">
-</ul>
-
-
-
-<p>Restaurant Inventory</p>
-
-<input
-    type="file"
-    id="restaurant_inventory"
-    accept=".xlsx,.xls">
-<br><br>
-
-<button id="inventory_history_update">
-update inventory history
-</button>
-
-
-<h4>Recent Inventory Snapshots</h4>
-
-<ul id="inventory_history_dates">
-</ul>
-
-
-<p>History PO</p>
-
-<input
-    type="file"
-    id="History_PO"
-    accept=".xlsx,.xls">
-
-<br><br>
-
-<p>Catalog</p>
-
-<input
-    type="file"
-    id="catalog"
-    accept=".xlsx,.xls">
-
-<br><br>
-
-<button id="catalog_update">
-update catalog
-</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h3>Calculation & Generation</h3>
 <p>Usage</p>
 
 <input
@@ -129,6 +64,26 @@ update catalog
 
 <br><br>
 
+
+<div class="upload-card">
+    <label>HQ Inventory</label>
+
+    <input
+        type="file"
+        id="hqInventoryFile"
+        accept=".xlsx,.xls"
+    >
+
+    <button
+        onclick="uploadHQInventory()"
+    >
+        Upload HQ Inventory
+    </button>
+
+    <span id="hqInventoryStatus"></span>
+</div>
+
+
 <button id="generateBtn">
 Generate PO
 </button>
@@ -154,12 +109,6 @@ Loading...
 
 <script src="{{ url_for('static', filename='input.js') }}"></script>
 
-
-<!--
-<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
-
-<script src="input.js"></script>
--->
 </body>
 
 </html>
