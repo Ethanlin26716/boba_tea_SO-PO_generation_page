@@ -1,36 +1,3 @@
-
-async function uploadHQInventory() {
-
-    const file =
-        document.getElementById("hqInventoryFile").files[0];
-
-    if (!file) {
-        alert("Please choose a file.");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch(
-        "/upload_hq_inventory",
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-    const result = await response.json();
-
-    document.getElementById(
-        "hqInventoryStatus"
-    ).innerText = result.message;
-}
-
-
-
-
-
 document
 .getElementById("generateBtn")
 .addEventListener("click", async () => {
@@ -78,7 +45,20 @@ document
         document.getElementById("replenishment_date").value
     );
 
+    // -------------------------
+    // Current HQ Inventory
+    // -------------------------
 
+    const hqInventory = document
+        .getElementById("hqInventory")
+        .files[0];
+
+    if (hqInventory) {
+        formData.append(
+            "hqInventory",
+            hqInventory
+        );
+    }
 
     const response = await fetch(
         "/generate",

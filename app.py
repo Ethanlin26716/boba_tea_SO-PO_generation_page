@@ -151,8 +151,6 @@ def inventory_history_dates():
     )
 
 
-
-
 @app.route("/update_purchase_history", methods=["POST"])
 def update_purchase_history_route():
 
@@ -185,26 +183,12 @@ def update_purchase_history_route():
 
 
 
-@app.route("/upload_hq_inventory", methods=["POST"])
-def upload_hq_inventory():
-
-    file = request.files["file"]
-
-    save_path = "uploads/hq_inventory.xlsx"
-
-    file.save(save_path)
-
-    return jsonify({
-        "message": "HQ inventory uploaded."
-    })
-
-
-
 @app.route("/generate", methods=["POST"])
 def generate():
 
     usage = request.files.get("usage")
     inventory_currentM = request.files.get("inventory_currentM")
+    hqInventory = request.files.get("hqInventory")
 
     # -------------------------
     # Save usage
@@ -233,6 +217,18 @@ def generate():
     # Save next replenish dates
     # -------------------------
     replenishment_date = request.form.get("replenishment_date")
+
+    # -------------------------
+    # Save current HQ inventory
+    # -------------------------
+
+    if hqInventory and hqInventory.filename != "":
+        hqInventory.save(
+            os.path.join(
+                UPLOAD_FOLDER,
+                "hqInventory.xlsx"
+            )
+        )
 
 
     # -------------------------
