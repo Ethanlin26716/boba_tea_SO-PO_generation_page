@@ -71,7 +71,7 @@ def usage_history_months():
     )
 
     periods = (
-        usage["出料时间段"]
+        usage["Usage Period"]
         .drop_duplicates()
         .sort_values(ascending=False)
         .tolist()
@@ -136,7 +136,7 @@ def inventory_history_dates():
 
     recent = (
         recent
-        .groupby("inv_snapshot_date")["门店名称"]
+        .groupby("inv_snapshot_date")["Store"]
         .apply(lambda x: ", ".join(x.dropna().astype(str).unique()))
         .reset_index()
     )

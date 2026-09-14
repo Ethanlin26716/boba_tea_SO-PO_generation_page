@@ -11,16 +11,16 @@ def history_updater(
 
         key_columns = [
             "inv_snapshot_date",
-            "门店名称",
-            "rawMaterial_EN"
+            "Store",
+            "Ingredient"
         ]
 
     elif history_type == "usage":
 
         key_columns = [
-            "出料时间段",
-            "门店名称",
-            "rawMaterial_EN"
+            "Usage Period",
+            "Store",
+            "Ingredient"
         ]
 
     else:

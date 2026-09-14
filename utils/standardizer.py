@@ -42,13 +42,12 @@ def convert_to_base(row):
 # --------------------------
 
 CLEANED = [
-"设备编号",
-"门店名称",
-"出料时间段",
-"出料时间段天数",
-"原料名称",
-"rawMaterial_EN",
-"原料代码",
+"Machine No.",
+"Store",
+"Usage Period",
+"Usage Days",
+"Ingredient",
+"Ingredient No.",
 "Shelf Life (months)",
 "Price ($)",
 "Package_Size_Base",
@@ -81,11 +80,11 @@ def standardize_data(df):
     # Tea Conversion
     # -------------------------
     df["adjusted_usage"] = pd.to_numeric(
-        df["出料总量"],
+        df["Total Usage"],
         errors="coerce"
     ).astype(float)
 
-    tea_mask = df["rawMaterial_EN"].str.contains(
+    tea_mask = df["Ingredient"].str.contains(
         "Tea",
         case=False,
         na=False

@@ -5,7 +5,7 @@ import calendar
 
 def validate_usage_period(df, period_type="current"):
 
-    period = df["出料时间段"].iloc[0]
+    period = df["Usage Period"].iloc[0]
 
     start_str, end_str = [
         x.strip()

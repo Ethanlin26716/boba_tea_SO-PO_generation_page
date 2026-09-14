@@ -8,16 +8,30 @@ INVENTORY_HISTORY = "history_data/inventory_history.xlsx"
 CATALOG_UPLOAD = "uploads/catalog.xlsx"
 CATALOG_DEFAULT_TEMPLATE = "excel_templates/Mascon_Ingredient_Catalog.xlsx"
 
-def load_usage(file_path):
+COLUMN_MAP = {
+    "设备编号": "Machine No.",
+    "门店名称": "Store",
+    "出料时间段": "Usage Period",
+    "出料时间段天数": "Usage Days",
+    "原料名称": "Ingredient",
+    "出料总量": "Total Usage",
+    "原料代码": "Ingredient No."
+}
 
+def load_usage(file_path):
     usage = pd.read_excel(file_path)
 
-    usage = usage[usage["门店名称"] != "Mascon"].copy()
+    if "Store" in usage.columns:
+        return usage
 
-    usage["rawMaterial_EN"] = (
-        usage["原料名称"]
-        .apply(extract_english)
-    )
+
+    usage = usage.rename(columns=COLUMN_MAP)
+
+    usage = usage[list(COLUMN_MAP.values())].copy()
+
+    usage = usage[usage["Store"] != "Mascon"].copy()
+
+    usage["Ingredient"] = (usage["Ingredient"].apply(extract_english))
 
     return usage
 
@@ -33,7 +47,7 @@ def load_catalog():
         catalog = pd.read_excel(CATALOG_DEFAULT_TEMPLATE)
         catalog.to_excel(CATALOG_FILE,index=False)
 
-    catalog["Product"] = (catalog["Product"].str.replace(r"\s*\(Selected\)","",regex=True)
+    catalog["Ingredient"] = (catalog["Ingredient"].str.replace(r"\s*\(Selected\)","",regex=True)
     )
 
     return catalog

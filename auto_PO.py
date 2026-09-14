@@ -29,8 +29,7 @@ def generate_po(replenishment_date):
 
     merged = materialConsumption.merge(
         ingredientCatalog,
-        left_on="rawMaterial_EN",
-        right_on="Product",
+        on="Ingredient",
         how="left"
     )
 
@@ -46,7 +45,7 @@ def generate_po(replenishment_date):
     )
 
     merged["Usage_Start"] = pd.to_datetime(
-        merged["出料时间段"].str.split("~").str[0]
+        merged["Usage Period"].str.split("~").str[0]
     )
 
     current_month = (
@@ -87,8 +86,8 @@ def generate_po(replenishment_date):
         restaurant_inv = (
             last_month_usage[
                 [
-                    "门店名称",
-                    "rawMaterial_EN",
+                    "Store",
+                    "Ingredient",
                     "Closing_Inventory"
                 ]
             ]
@@ -108,7 +107,7 @@ def generate_po(replenishment_date):
 
     merged_inv = merged.merge(
         restaurant_inv,
-        on=["门店名称", "rawMaterial_EN"],
+        on=["Store", "Ingredient"],
         how="left"
     )
 
@@ -138,11 +137,11 @@ def generate_po(replenishment_date):
     # key dates
     # ---------------------------
     merged_inv["Usage_Start"] = pd.to_datetime(
-        merged_inv["出料时间段"].str.split("~").str[0]
+        merged_inv["Usage Period"].str.split("~").str[0]
     )
 
     merged_inv["Usage_End"] = pd.to_datetime(
-        merged_inv["出料时间段"].str.split("~").str[1]
+        merged_inv["Usage Period"].str.split("~").str[1]
     )
     
 
@@ -160,7 +159,7 @@ def generate_po(replenishment_date):
 
     #days of usage need to check last month
     merged_inv["last_month_usage_days"] = (
-        30 - merged_inv["出料时间段天数"]
+        30 - merged_inv["Usage Days"]
     )
 
     #inv days 
@@ -175,7 +174,7 @@ def generate_po(replenishment_date):
 
     merged_inv["average_daily_usage"] = (
         merged_inv["adjusted_usage"] 
-        / merged_inv["出料时间段天数"]
+        / merged_inv["Usage Days"]
         )
 
 
@@ -212,8 +211,8 @@ def generate_po(replenishment_date):
 
         last_month_usage[
             [
-                "门店名称",
-                "rawMaterial_EN",
+                "Store",
+                "Ingredient",
                 "adjusted_usage"
             ]
         ].rename(
@@ -223,8 +222,8 @@ def generate_po(replenishment_date):
         ),
 
         on=[
-            "门店名称",
-            "rawMaterial_EN"
+            "Store",
+            "Ingredient"
         ],
 
         how="left"

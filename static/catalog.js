@@ -24,7 +24,7 @@ function renderTable() {
         trs.forEach((tr, index) => {
             const inputs = tr.querySelectorAll("input");
             if (inputs.length === 4 && catalog[index]) {
-                catalog[index]["Product"] = inputs[0].value;
+                catalog[index]["Ingredient"] = inputs[0].value;
                 catalog[index]["Order Unit"] = inputs[1].value;
                 catalog[index]["Price ($)"] = inputs[2].value;
                 catalog[index]["Shelf Life (months)"] = inputs[3].value;
@@ -38,14 +38,14 @@ function renderTable() {
         let tr = document.createElement("tr");
         if (editing) {
             tr.innerHTML = `
-                <td><input value="${row.Product ?? ''}"></td>
+                <td><input value="${row.Ingredient ?? ''}"></td>
                 <td><input value="${row["Order Unit"] ?? 0}"></td>
                 <td><input value="${row["Price ($)"] ?? 0}"></td>
                 <td><input value="${row["Shelf Life (months)"] ?? 0}"></td>
             `;
         } else {
             tr.innerHTML = `
-                <td>${row.Product ?? ''}</td>
+                <td>${row.Ingredient ?? ''}</td>
                 <td>${row["Order Unit"] ?? ''}</td>
                 <td>${row["Price ($)"] ?? ''}</td>
                 <td>${row["Shelf Life (months)"] ?? ''}</td>
@@ -55,75 +55,6 @@ function renderTable() {
     });
 }
 
-/**
-async function loadCatalog(){
-
-    const response = await fetch("/catalog/data");
-
-    catalog = await response.json();
-
-    renderTable();
-
-}
-
-function renderTable(){
-
-    const tbody = document.querySelector("#catalogTable tbody");
-
-    tbody.innerHTML = "";
-
-    catalog.forEach((row,index)=>{
-
-        let tr=document.createElement("tr");
-
-        if(editing){
-
-            tr.innerHTML=`
-
-            <td>
-            <input value="${row.Product}">
-            </td>
-
-            <td>
-            <input value="${row["Order Unit"]}">
-            </td>
-
-            <td>
-            <input value="${row["Price ($)"]}">
-            </td>
-
-            <td>
-            <input value="${row["Shelf Life (months)"]}">
-            </td>
-
-            `;
-
-        }
-
-        else{
-
-            tr.innerHTML=`
-
-            <td>${row.Product}</td>
-
-            <td>${row["Order Unit"]}</td>
-
-            <td>${row["Price ($)"]}</td>
-
-            <td>${row["Shelf Life (months)"]}</td>
-
-            `;
-
-        }
-
-        tbody.appendChild(tr);
-
-    });
-
-    renderButtons();
-
-}
-*/
 
 function renderButtons(){
 
@@ -188,7 +119,7 @@ function addRow(){
 
     catalog.push({
 
-        Product:"",
+        "Ingredient":"",
 
         "Order Unit":0,
 
@@ -212,7 +143,7 @@ async function saveCatalog(){
 
         rows.push({
 
-            Product:inputs[0].value,
+            "Ingredient":inputs[0].value,
 
             "Order Unit":inputs[1].value,
 

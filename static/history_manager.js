@@ -144,7 +144,7 @@ async function loadInventoryDates() {
             document.createElement("li");
 
         li.textContent =
-            `${row.inv_snapshot_date} — ${row.门店名称}`;
+            `${row.inv_snapshot_date} — ${row.Store}`;
 
         list.appendChild(li);
 

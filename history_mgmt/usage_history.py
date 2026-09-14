@@ -27,8 +27,7 @@ def standardlize_history():
 
     merged = materialConsumption.merge(
         ingredientCatalog,
-        left_on="rawMaterial_EN",
-        right_on="Product",
+        on="Ingredient",
         how="left"
     )
 
@@ -55,7 +54,7 @@ def update_usage_history():
     # Clean, Append, Sort
     history = history_updater(history, usage,"usage")
 
-    history = history[history["门店名称"] != "Mascon"].copy()
+    history = history[history["Store"] != "Mascon"].copy()
 
     save_by_store_excel(history, HISTORY_FILE)
 

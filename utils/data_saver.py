@@ -18,7 +18,7 @@ def save_by_store_excel(df, file_path):
         )
 
         # Store sheets
-        for store, store_df in df.groupby("门店名称"):
+        for store, store_df in df.groupby("Store"):
 
             store_df.to_excel(
                 writer,
@@ -31,12 +31,11 @@ def save_by_store_excel(df, file_path):
 
 
 PO_OUTPUT_COLUMNS = [
-    "设备编号",
-    "门店名称",
-    "出料时间段",
-    "原料名称",
-    "rawMaterial_EN",
-    "原料代码",
+    "Machine No.",
+    "Store",
+    "Usage Period",
+    "Ingredient",
+    "Ingredient No.",
     "Shelf Life (months)",
     "Price ($)",
     "Package_Size_Base",
@@ -59,7 +58,7 @@ def save_po_excel(store_output, file_path, hq_inventory=None):
         engine="openpyxl"
     ) as writer:
 
-        for store, store_df in store_output.groupby("门店名称"):
+        for store, store_df in store_output.groupby("Store"):
 
             store_df.to_excel(
                 writer,
@@ -69,7 +68,7 @@ def save_po_excel(store_output, file_path, hq_inventory=None):
 
         summary = (
             store_output
-            .groupby("rawMaterial_EN", as_index=False)
+            .groupby("Ingredient", as_index=False)
             .agg({
                 "Recommended_Quantity": "sum",
                 "Price ($)": "first"
@@ -80,7 +79,7 @@ def save_po_excel(store_output, file_path, hq_inventory=None):
 
             summary = summary.merge(
                 hq_inventory,
-                on="rawMaterial_EN",
+                on="Ingredient",
                 how="left"
             )
 
@@ -147,16 +146,16 @@ def build_po_json(store_output, replenishment_date):
         record = {
 
             "restaurant_code":
-                row["门店名称"],
+                row["Store"],
 
             "machine_code":
-                row["设备编号"],
+                row["Machine No."],
 
             "period":
-                row["出料时间段"],
+                row["Usage Period"],
 
             "ingredient_name":
-                row["原料名称"],
+                row["Ingredient"],
 
 
             "calculation_input": {

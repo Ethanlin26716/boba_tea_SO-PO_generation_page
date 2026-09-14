@@ -64,14 +64,14 @@ def sync_inventory_usage():
 
     #Find latest usage month
     usage["Usage_Start"] = pd.to_datetime(
-        usage["出料时间段"]
+        usage["Usage Period"]
         .str.split("~")
         .str[0]
     )
 
     #Find the larget date of current dataset stored
     usage["Usage_End"] = pd.to_datetime(
-        usage["出料时间段"]
+        usage["Usage Period"]
         .str.split("~")
         .str[1]
     )

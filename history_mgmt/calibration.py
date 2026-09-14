@@ -24,15 +24,15 @@ def calibrate_opening_inventory(
     usage_current_month = usage_current_month.merge(
         latest_inventory[
             [
-                "门店名称",
-                "rawMaterial_EN",
+                "Store",
+                "Ingredient",
                 "current_inventory",
                 "inv_snapshot_date"
             ]
         ],
         on=[
-            "门店名称",
-            "rawMaterial_EN"
+            "Store",
+            "Ingredient"
         ],
         how="left"
     )
@@ -47,7 +47,7 @@ def calibrate_opening_inventory(
     # ---------------------------------
     usage_current_month["daily_usage"] = (
         usage_current_month["adjusted_usage"]
-        / usage_current_month["出料时间段天数"]
+        / usage_current_month["Usage Days"]
     )
 
     days_elapsed = latest_snapshot.day
@@ -67,8 +67,8 @@ def calibrate_opening_inventory(
 
     calibrated = usage_current_month[
         [
-            "门店名称",
-            "rawMaterial_EN",
+            "Store",
+            "Ingredient",
             "Usage_Month",
             "Opening_Inventory",
             "Inventory_Status"
@@ -91,8 +91,8 @@ def calibrate_opening_inventory(
     usage = usage.merge(
         calibrated,
         on=[
-            "门店名称",
-            "rawMaterial_EN",
+            "Store",
+            "Ingredient",
             "Usage_Month"
         ],
         how="left"

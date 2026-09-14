@@ -55,8 +55,8 @@ def rolling_update_inventory(usage, start_month):
         current_inventory = usage.loc[
             mask,
             [
-                "门店名称",
-                "rawMaterial_EN",
+                "Store",
+                "Ingredient",
                 "Closing_Inventory"
             ]
         ]
@@ -65,8 +65,8 @@ def rolling_update_inventory(usage, start_month):
 
             next_mask = (
                 (usage["Usage_Month"] == next_month)
-                & (usage["门店名称"] == row["门店名称"])
-                & (usage["rawMaterial_EN"] == row["rawMaterial_EN"])
+                & (usage["Store"] == row["Store"])
+                & (usage["Ingredient"] == row["Ingredient"])
             )
 
             usage.loc[
